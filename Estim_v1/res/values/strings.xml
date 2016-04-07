@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Estim_v1</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="instrucion1">Inicio seccion</string>
+    <string name="titulo">Inicio de Sección</string>
+    <string name="ok">Listo</string>
+    <string name="error_de_contrasena">La contraseña o el usuario es incorrecto</string>
+    <string name="usuario_no_valido">Usted no tiene autorizacion</string>
+    <string name="usuario_listo">¿Esta listo para iniciar?</string>
+    <string name="si">Si</string>
+    <string name="no">No</string>  
+    <string name="usuario_listo_titulo">importante</string>   
+    <string name="conexion">Inicio de conexion</string> 
+    <string name="estimulacion">Inicio de estimulacion</string>    
+</resources>

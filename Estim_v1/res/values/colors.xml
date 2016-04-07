@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <color name="color_azul_clado">#ADC1E9</color>
+      <color name="color_morado">#5755F0</color>
+    <color name="boton1">#185AE9</color>
+    <color name="boton2">#E9AA18</color>
+    <color name="blanco">#FFFFFF</color>
+    <color name="negro">#000000</color>
+    <color name="curva">#7F3FD9</color>
+    <color name="curva1">#D02920</color>
+    <color name="morado">#CFADEE</color>
+    <color name="azul_fuerte">#190F7E</color>
+</resources>
