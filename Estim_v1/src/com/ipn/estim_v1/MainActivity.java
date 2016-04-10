@@ -14,13 +14,16 @@ import java.util.TimerTask;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
+import android.R;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,6 +46,9 @@ public class MainActivity extends ActionBarActivity implements OnTouchListener{
 	EditText contrasena1a;
 	EditText usuario1a;
 	ProgressDialog dialogo;
+	
+	Paciente paciente;
+	Historico historico;
 	
 	int tecla =  13;
 	int cont = 0;
@@ -67,7 +73,7 @@ public class MainActivity extends ActionBarActivity implements OnTouchListener{
 			  
 			vista1.invalidate();
 			
-			setContentView(R.layout.activity_main);
+			setContentView(R.layout.ac);
 			
 			if (datos_guardados.leer(0) != null || datos_guardados.leer(0).equals(""))
 			{
@@ -91,6 +97,8 @@ public class MainActivity extends ActionBarActivity implements OnTouchListener{
        setContentView(vista1);
        tiempo();
        
+       // ****** SE GENERA EL TOKEN EN PUSHBOTS Y SE GUARDA LOCALMENTE ******* //
+//       conectarConPushbots();
     }
     
     protected void onPause()
@@ -194,6 +202,7 @@ public class MainActivity extends ActionBarActivity implements OnTouchListener{
     		
     		if(datos_guardados.leer(0).equals(usuario1a.getText().toString()) && datos_guardados.leer(1).equals(contrasena1a.getText().toString()))
     		{
+    			login(usuario1a.getText().toString(), contrasena1a.getText().toString());// Añadido
     			autorizado = true;
     			//dialogo = ProgressDialog.show(this, "Espere","Espere por favor...", true);  
     	    	setContentView(vista1);
@@ -278,4 +287,96 @@ public class MainActivity extends ActionBarActivity implements OnTouchListener{
 		AlertDialog alert = builder.create(); 
 		builder.show();
 	}
+	
+	
+	//*********** MODIFICACIONES *******///////
+	
+	public void login(String user, String password){ /// ESTE METODO
+        DialogoCargando.mostrarDialogo(this);
+        String token = ""; // obtenerTokenGuardado();
+        if(token != null){
+	        WebServ ws = new WebServ();
+	        paciente  = new Paciente();
+	        ws.obtenerPacienteYestimWS(paciente, user, password, token, new Runnable() {
+	            @Override
+	            public void run() {
+	                respuestaExitoWS();
+	            }
+	        }, new Runnable() {
+	            @Override
+	            public void run() { //SI OCURRE UN ERROR NO SE DEBERÍA TENER AUTORIZACIÓN PARA INICIAR SESIÓN
+	                respuestaErrorWS();
+	            }
+	        }, new Runnable() {
+	            @Override
+	            public void run() { // MISMO CASO QUE EL ANTERIOR
+	                mensajeExcepcion();
+	            }
+	        });
+        }else{ //NO HAY TOKEN, NO SE DEBERÍA TENER AUTORIZACIÓN PARA INICIAR SESIÓN
+        	DialogoCargando.ocultarDialogo();
+        	Toast.makeText(this, "No hay token registrado, reinicie la aplicación", Toast.LENGTH_SHORT).show();
+        }
+    }
+	
+	public void respuestaExitoWS (){ // ESTE METODO
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DialogoCargando.ocultarDialogo();
+                Toast.makeText(getApplicationContext(),
+                 "ID Usuario: "+paciente.getIdUsuario()+"\n"+
+                 "Nombre: "+paciente.getNombre()+"\n"+
+                 "A. Paterno: "+paciente.getApaterno()+"\n"+
+                 "ID Paciente: "+paciente.getIdPaciente()+"\n"+
+                 "ID Estimulador: "+paciente.getIdEstimulador()+"\n"+
+                 "Serie: "+paciente.getNumSerie()+"\n"
+                , Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void respuestaErrorWS (){  // ESTE METODO
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DialogoCargando.ocultarDialogo();
+                Toast.makeText(getApplicationContext(), "Error: "+paciente.getMensajeError(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void mensajeExcepcion(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                DialogoCargando.ocultarDialogo();
+                Toast.makeText(getApplicationContext(), "Ocurrió un problema de comunicación con el WS", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    private void conectarConPushbots(){
+    	try{
+	        Pushbots.sharedInstance().init(this);
+	        Pushbots.sharedInstance().setCustomHandler(customHandler.class);
+	        String token = Pushbots.sharedInstance().regID();
+	        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+	        SharedPreferences.Editor editor = sp.edit();
+	        editor.putString("token", token != null ? token : "");
+	        editor.commit();
+    	}catch(Exception ex){
+    		
+    	}
+    }
+    
+    private String obtenerTokenGuardado(){
+    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String token = sp.getString("token", "");
+        if(token.trim().length() > 0){
+        	return token.trim();
+        }
+        return null;
+    }
+	
 }

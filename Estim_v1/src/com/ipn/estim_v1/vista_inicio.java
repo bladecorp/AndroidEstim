@@ -1,5 +1,6 @@
 package com.ipn.estim_v1;
 
+import android.R;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
